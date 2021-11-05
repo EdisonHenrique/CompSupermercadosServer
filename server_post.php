@@ -10,9 +10,9 @@
             $insertValues .= ", '$dadosS[1]'"; 
         }
         $insertComand .= ") " . $insertValues . ")";
-        if (!empty($dados[0][0])) {
-            $insertComand = $insertComand . "WERE id = " . $dados[0][0];
-        }
+        //if (!empty($dados[0][0])) {
+        //    $insertComand = $insertComand . "WERE id = " . $dados[0][0];
+        //}
         return $insertComand;
     }
 
