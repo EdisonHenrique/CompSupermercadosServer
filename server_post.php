@@ -53,7 +53,7 @@
             // Se o produto foi inserido corretamente no servidor, o cliente 
             // recebe a chave "success" com valor 1
             $response["success"] = 1;
-            $response["message"] = "Produto criado com sucesso";
+            $response["message"] = "Produto criado com sucesso $dados";
             
             // Fecha a conexao com o BD
             pg_close($con);
@@ -65,7 +65,7 @@
             // recebe a chave "success" com valor 0. A chave "message" indica o 
             // motivo da falha.
             $response["success"] = 0;
-            $response["message"] = "Erro ao criar produto no BD";
+            $response["message"] = "Erro ao criar produto no BD $dados";
             
             // Fecha a conexao com o BD
             pg_close($con);
@@ -79,7 +79,7 @@
         // recebe a chave "success" com valor 0. A chave "message" indica o 
         // motivo da falha.
         $response["success"] = 0;
-        $response["message"] = "Campo requerido nao preenchido";
+        $response["message"] = "Campo requerido nao preenchido $dados";
      
         // Converte a resposta para o formato JSON.
         echo json_encode($response);
