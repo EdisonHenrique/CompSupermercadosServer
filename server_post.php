@@ -46,14 +46,16 @@
         }
 
         $con = pg_connect(getenv("DATABASE_URL"));
-        $result = pg_query($con, makeInsert($dados));
+        $insert = makeInsert($dados);
+        $result = pg_query($con, $insert);
+
         
         // Daqui pra baixo o codigo foi 100% copiado do professor
         if ($result) {
             // Se o produto foi inserido corretamente no servidor, o cliente 
             // recebe a chave "success" com valor 1
             $response["success"] = 1;
-            $response["message"] = "Produto criado com sucesso $dados";
+            $response["message"] = "Produto criado com sucesso $insert";
             
             // Fecha a conexao com o BD
             pg_close($con);
@@ -65,7 +67,7 @@
             // recebe a chave "success" com valor 0. A chave "message" indica o 
             // motivo da falha.
             $response["success"] = 0;
-            $response["message"] = "Erro ao criar produto no BD $dados";
+            $response["message"] = "Erro ao criar produto no BD $insert";
             
             // Fecha a conexao com o BD
             pg_close($con);
@@ -79,7 +81,7 @@
         // recebe a chave "success" com valor 0. A chave "message" indica o 
         // motivo da falha.
         $response["success"] = 0;
-        $response["message"] = "Campo requerido nao preenchido $dados";
+        $response["message"] = "Campo requerido nao preenchido $insert";
      
         // Converte a resposta para o formato JSON.
         echo json_encode($response);
