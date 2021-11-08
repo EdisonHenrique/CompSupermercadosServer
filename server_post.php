@@ -1,36 +1,27 @@
 <?php
 
-    function makeInsert($dados) {
-        $dadosS = $dados[1];
-        $insertComand = "INSERT INTO " . $dados[0][1] . "(" . $dadosS[0];
-        $insertValues = "VALUES (" . "'$dadosS[1]'";
-        for ($i=2; $i < count($dados); $i++) {
-            $dadosS = $dados[$i];
-            $insertComand .= ", " . $dadosS[0];
-            $insertValues .= ", '$dadosS[1]'"; 
-        }
-        $insertComand .= ") " . $insertValues . ")";
+    function makeInsert() {
+        $insertComand = "INSERT INTO " . $_POST["table"] . "(";
+        $insertValues = "VALUES (";
+        foreach ($_POST as $key => $value) {
+            if ($key != "table") {
+                $insertComand .= $key . ", ";
+                $insertValues .= "'$value', ";
+            }
+        } 
+        $insertComand = substr_replace($insertComand,") ", strlen($insertComand) -2);
+        $insertValues = substr_replace($insertValues,")", strlen($insertValues) -2);
+        $insert = $insertComand . $insertValues;
         //if (!empty($dados[0][0])) {
         //    $insertComand = $insertComand . "WERE id = " . $dados[0][0];
         //}
-        return $insertComand;
+        return $insert;
     }
 
     $response = array();
     $dados = array();
     
     if (!empty($_POST)) {
-        
-        //O foreach abaixo é para que os dados fiquem 
-        //dentro de um array que facilite o seu manuseio 
-        //para a criação da string sql de forma dinamica
-        //É importante que o primeiro item do post siga o padrão: ação no slq:tabela
-        $count = 0;
-        foreach ($_POST as $key => $value) {
-            $dados = array_merge($dados, array($count => array($key, $value)));
-            $count++;
-        }
-
         /* Tem um problema aqui, essa função precisa filtrar
         caso aja a superglobal $_FILES, caso a superglobal 
         não exista o codigo deve ser executado normalmente,
@@ -46,7 +37,7 @@
         }
 
         $con = pg_connect(getenv("DATABASE_URL"));
-        $insert = makeInsert($dados);
+        $insert = makeInsert();
         $result = pg_query($con, $insert);
 
         
