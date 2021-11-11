@@ -3,13 +3,13 @@
 	require_once "util.php";
 		
 	function require_id() {
-		check_request_params("GET", ["id"]);
+		check_superglobal_params("GET", ["id"]);
 		return $_GET["id"];
 	}
 
 	// ------------------------------------------------- //
 
-	check_request_params("GET", ["queryType"]);
+	check_superglobal_params("GET", ["queryType"]);
 	
 	// Determine SQL query
 	switch( $_GET["queryType"] ) {
@@ -39,6 +39,15 @@
 			";
 			break;
 
+		case 'verifyLogin':
+			check_superglobal_params("SERVER", ['PHP_AUTH_USER', 'PHP_AUTH_PW']);
+			$query = "
+					SELECT *
+					FROM usuario
+					WHERE email = '" . $_SERVER['PHP_AUTH_USER'] . "' 
+					AND senha = '" . $_SERVER['PHP_AUTH_PW'] . "'
+				";
+			break;
 	}
 
 	// Attempt server connection
