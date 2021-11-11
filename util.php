@@ -22,18 +22,21 @@
 				break;	
 				
 			case "get":
-				$requestVar = $_GET;
+				$superglobalName = $_GET;
 				break;
 				
 			case "post":
-				$requestVar = $_POST;
+				$superglobalName = $_POST;
+				break;
+			case "server":
+				$superglobalName = $_SERVER;
 				break;
 		}
 		
 		if (
-			!array_key_exists($parameter, $requestVar) 
-			or !isset($requestVar[$parameter])
-			or $requestVar[$parameter] == ""
+			!array_key_exists($parameter, $superglobalName) 
+			or !isset($superglobalName[$parameter])
+			or $superglobalName[$parameter] == ""
 		) {
 			return FALSE;
 		}
@@ -42,7 +45,7 @@
 	}
 	
 
-	function check_request_params(string $requestMethod, array $parameters) { 
+	function check_superglobal_params(string $requestMethod, array $parameters) { 
 		foreach ($parameters as $parameter) {
 			if (!request_param_valid($requestMethod, $parameter)) {
 				exit_with_error_response("Invalid or missing parameter: $parameter");
