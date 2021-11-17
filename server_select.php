@@ -30,6 +30,16 @@
 				WHERE supermercado.id = $id
 			";
 			break;
+
+
+		case "supermarketInfo":
+			$id = require_id();
+			$query = "
+				SELECT * 
+				FROM supermercado
+				WHERE id = $id
+			";
+			break;
 		
 		case "userInfo":
 			$id = require_id();
