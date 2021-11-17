@@ -61,6 +61,16 @@
 				AND senha = '" . $_SERVER['PHP_AUTH_PW'] . "'
 			";
 			break;
+
+		case 'productInfo':
+			check_superglobal_params("GET", ["cod_barras"]);
+			$query = "
+					SELECT *
+					FROM produto
+					WHERE cod_barras = '" . $_GET['cod_barras'] . "'
+				";
+			break;
+			
 	}
 
 	// Attempt server connection
