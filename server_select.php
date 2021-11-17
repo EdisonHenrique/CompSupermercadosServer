@@ -42,11 +42,11 @@
 		case 'verifyLogin':
 			check_superglobal_params("SERVER", ['PHP_AUTH_USER', 'PHP_AUTH_PW']);
 			$query = "
-					SELECT *
-					FROM usuario
-					WHERE email = '" . $_SERVER['PHP_AUTH_USER'] . "' 
-					AND senha = '" . $_SERVER['PHP_AUTH_PW'] . "'
-				";
+				SELECT *
+				FROM usuario
+				WHERE email = '" . $_SERVER['PHP_AUTH_USER'] . "' 
+				AND senha = '" . $_SERVER['PHP_AUTH_PW'] . "'
+			";
 			break;
 	}
 
@@ -68,7 +68,7 @@
 		exit_with_error_response("Query error: $resultError");
 	}
 	else {
-		$resultData = pg_fetch_assoc($result);
+		$resultData = pg_fetch_all($result);
 		if ($resultData) {
 			output_json_response(1, $resultData);
 		} 
