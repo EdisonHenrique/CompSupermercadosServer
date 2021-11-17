@@ -17,14 +17,17 @@
 		default:
 			exit_with_error_response("Invalid query name");
 			
-		case "productCatalog":
+		case "supermarketItems":
+			$id = require_id();
 			$query = "
-				SELECT produto.nome
+				SELECT produto.id
+					 , produto.nome
 					 , preco_atual
 					 , imagem 
 				FROM item
 				INNER JOIN produto ON item.id_produto = produto.id
 				INNER JOIN supermercado ON item.id_supermercado = supermercado.id
+				WHERE supermercado.id = $id
 			";
 			break;
 		
