@@ -30,7 +30,7 @@
             FROM item
             INNER JOIN produto ON item.id_produto = produto.id
             WHERE cod_barras = '$barcode'
-            AND id_supermercado = $supermarketId;
+            AND id_supermercado = $supermarketId
         ";
 
         $resultData = run_query($query);
@@ -96,7 +96,7 @@
                 '{$object['description']}', 
                 '{$object['thumbnail']}', 
                 1 
-            );
+            )
         ";
         run_query($query, $ignoreErrors=true);
 
@@ -105,7 +105,7 @@
         $query = "
             SELECT id 
             FROM produto
-            WHERE cod_barras = '$barcode';
+            WHERE cod_barras = '$barcode'
         ";
         $resultData = run_query($query);
 
@@ -120,42 +120,12 @@
                 now(),
                 $supermarketId,
                 $productId
-            );
+            )
         ";
         run_query($query);
-
-
+        
+        
         get_specified_item_id($barcode, $supermarketId);        
     }
-    
-    //echo json_encode($json);
-    
-    /*
-    $cod_barras = trim($_GET["barcode"]);
-    $url = "https://api.cosmos.bluesoft.com.br/gtins/$barcode.json";
-    $agent = "Cosmos-API-Request";
-    $headers = array(
-        "Content-Type: application/json",
-        "X-Cosmos-Token: bJ2x_WUhAmLnawr0dI50Mw"
-    );
-    
-    $curl = curl_init($url);
-    curl_setopt($curl, CURLOPT_USERAGENT, $agent);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_FAILONERROR, true);
-    
-    $data = curl_exec($curl);
-    if ($data === false || $data == NULL) {
-        $resultError = curl_error($curl);
-        exit_with_error_response("Query error: $resultError");
-    } else {
-        $object = json_decode($data);
-        output_json_response(1, $object);
-    }
-    
-    curl_close($curl);
-    */
 
     ?>
