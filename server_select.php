@@ -31,7 +31,6 @@
 			";
 			break;
 
-
 		case "supermarketInfo":
 			$id = require_id();
 			$query = "
@@ -62,13 +61,16 @@
 			";
 			break;
 
-		case 'productInfo':
-			check_superglobal_params("GET", ["cod_barras"]);
+		case 'itemInfo':
+			$id = require_id();
 			$query = "
-					SELECT *
-					FROM produto
-					WHERE cod_barras = '" . $_GET['cod_barras'] . "'
-				";
+				SELECT nome
+					 , preco_atual
+					 , imagem
+				FROM item
+				INNER JOIN produto ON item.id_produto = produto.id
+				WHERE item.id = $id
+			";
 			break;
 			
 	}
