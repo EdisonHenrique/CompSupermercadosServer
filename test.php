@@ -1,6 +1,6 @@
 <?php
 
-    $consult_bd_url = $_SERVER["SERVER_ADDR"] . "/CompSupermercadosServer/server_select.php?queryType=itemInfo&id=1";
+    $consult_bd_url = $_SERVER["SERVER_ADDR"] . "/server_select.php?queryType=itemInfo&id=1";
 
     $curl = curl_init($consult_bd_url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
