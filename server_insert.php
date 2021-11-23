@@ -2,34 +2,39 @@
 
     require_once "util.php";
 
-    function makeInsert() {
-        $insertComand = "INSERT INTO " . trim($_POST["table"]) . "(";
-        $insertValues = "VALUES (";
-        foreach ($_POST as $key => $value) {
-            if ($key != "table") {
-                $value = trim($value);
-                $insertComand .= $key . ", ";
-                $insertValues .= "'$value', ";
+    function makeInsert(array $columnValues) {
+        $insertCommand = "INSERT INTO " . trim($_POST["table"]) . " (";
+        $insertValues = " VALUES (";
+        foreach ($columnValues as $column => $value) {
+            if (!is_numeric($value)) {
+                $value = "'$value'";
             }
+            $insertCommand .= "$column, ";
+            $insertValues .= "$value, ";
         } 
-        $insertComand = substr_replace($insertComand,") ", strlen($insertComand) -2);
-        $insertValues = substr_replace($insertValues,")", strlen($insertValues) -2);
-        $query = $insertComand . $insertValues;
-        //if (!empty($dados[0][0])) {
-        //    $insertComand = $insertComand . "WERE id = " . $dados[0][0];
-        //}
+        $insertCommand = rtrim($insertCommand, ", ") . ")";
+        $insertValues = rtrim($insertValues, ", ") . ")";
+
+        $query = $insertCommand . $insertValues;
+        $query = str_replace("\r\n", "", $query);
+
         return $query;
     }
 
+
     // Create the parameters array
-    $parameters = array();
+    $requiredParams = ["table"];
+    $columnValues = array();
     foreach ($_POST as $key => $value) {
-        array_push($parameters, $key);
+        if (!in_array($key, $requiredParams, true)) {
+            $requiredParams[] = $key;
+            $columnValues[$key] = trim($value);
+        }
     }
     
-    check_superglobal_params("POST", $parameters);
+    check_superglobal_params("POST", $requiredParams);
 
-    $query = makeInsert();
+    $query = makeInsert($columnValues);
 
     // Attempt server connection
     $conn = pg_connect(getenv("DATABASE_URL"));
@@ -39,16 +44,17 @@
     
     // Run SQL query
 	$result = pg_query($conn, $query);
+    $error = trim(pg_last_error($conn), "\n^ ");
 
     // Close server connection 
 	pg_close($conn);
 
     if (!$result) {
 		$resultError = pg_result_error($result);
-		exit_with_error_response("Query error: $resultError");
+		exit_with_error_response($error);
 	}
 	else {
-		output_json_response(1, $_POST["table"] . "criado com suceesso.");
+		output_json_response(1, "Row inserted successfully");
 	}
 
     /* Tem um problema aqui, essa função precisa filtrar
