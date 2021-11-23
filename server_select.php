@@ -51,7 +51,7 @@
 			";
 			break;
 
-		case 'verifyLogin':
+		case "verifyLogin":
 			check_superglobal_params("SERVER", ['PHP_AUTH_USER', 'PHP_AUTH_PW']);
 			$query = "
 				SELECT *
@@ -61,7 +61,7 @@
 			";
 			break;
 
-		case 'itemInfo':
+		case "itemInfo":
 			$id = require_id();
 			$query = "
 				SELECT nome
@@ -83,6 +83,7 @@
 	
 	// Run SQL query
 	$result = pg_query($conn, $query);
+	$error = preg_replace("/[[:blank:]]+/", " ", pg_last_error($conn));
 	
 	// Close server connection 
 	pg_close($conn);
@@ -90,7 +91,7 @@
 	// Echo query result/error JSON
 	if (!$result) {
 		$resultError = pg_result_error($result);
-		exit_with_error_response("Query error: $resultError");
+		exit_with_error_response($error);
 	}
 	else {
 		$resultData = pg_fetch_all($result);
