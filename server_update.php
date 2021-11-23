@@ -1,30 +1,40 @@
 <?php
     require_once "util.php";
 
-    function makeUpdate() {
+    function makeUpdate(array $columnValues) {
         $update = "UPDATE " . trim($_POST["table"]);
-        $set = " SET";
-        foreach ($_POST as $key => $value) {
-            if ($key != "table" or $key != "where") {
-                $value = trim($value);
-                $set .= " $key = '$value',";
+
+        $set = " SET ";
+        foreach ($columnValues as $column => $value) {
+            if (!is_numeric($value)) {
+                $value = "'$value'";
             }
+            $set .= "$column = $value, ";
         }
-        $set = substr_replace($set," ", strlen($set) -1);
-        $where = "WHERE id = " . $_POST["id"];
+        $set = rtrim($set, ", ");
+
+        $where = " WHERE id = " . $_POST["id"];
+
         $query = $update . $set . $where;
+        $query = str_replace("\r\n", "", $query);
+
         return $query;
     }
 
-    // Create the parameters array
-    $parameters = array();
-    foreach ($_POST as $key => $value) {
-        array_push($parameters, $key);
-    }
     
-    check_superglobal_params("POST", $parameters);
+    // Create the parameters array
+    $requiredParams = ["table", "id"];
+    $columnValues = array();
+    foreach ($_POST as $key => $value) {
+        if (!in_array($key, $requiredParams, true)) {
+            $requiredParams[] = $key;
+            $columnValues[$key] = trim($value);
+        }
+    }
 
-    $query = makeUpdate();
+    check_superglobal_params("POST", $requiredParams);
+
+    $query = makeUpdate($columnValues);
 
     // Attempt server connection
     $conn = pg_connect(getenv("DATABASE_URL"));
@@ -34,15 +44,15 @@
     
     // Run SQL query
 	$result = pg_query($conn, $query);
+    $error = trim(pg_last_error($conn), "\n^ ");
 
     // Close server connection 
 	pg_close($conn);
 
     if (!$result) {
-		$resultError = pg_result_error($result);
-		exit_with_error_response("Query error: $resultError");
+        exit_with_error_response($error);
 	}
 	else {
-		output_json_response(1, $_POST["table"] . "criado com suceesso.");
+		output_json_response(1, "Table updated successfully");
 	}
 ?>
