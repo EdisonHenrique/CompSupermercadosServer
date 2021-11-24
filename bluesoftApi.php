@@ -35,7 +35,6 @@
 
         $resultData = run_query($query);
 
-        // Item retornado do banco
         if ($resultData) {
             $resultData = [
                 "itemId" => $resultData[0]["id"]
@@ -47,12 +46,12 @@
         else return false;
     }
 
-    check_superglobal_params("GET", ["barcode", "supermarketId"]);
+    check_superglobal_params("POST", ["barcode", "supermarketId"]);
 
-    $barcode = $_GET["barcode"];
-    $supermarketId = $_GET["supermarketId"];
+    $barcode = $_POST["barcode"];
+    $supermarketId = $_POST["supermarketId"];
 
-    // Não existe o item especificado no banco
+    // Se a tentativa de obter o item especificado falhar
     if ( !get_specified_item_id($barcode, $supermarketId) ) {
         /*
             INICIO DO REQUEST À API BLUESOFT COSMOS
@@ -82,22 +81,23 @@
             FIM DO REQUEST À API
         */
         
-        $object = json_decode($data, true); // Array assoc. de dados retornados pela API
-        //output_json_response(1, $object);
-        
+        $object = json_decode($data, true); // Array assoc. de dados retornados pela API   
+
 
         // Criação de novo produto no BD.
-        // Em teoria, o único erro que pode dar é se já existir o cod_barras especificado,
-        // o que é o comportamento esperado. Por isso, sem tratamento de erro aqui.
+        // O valor '1' é o tipo_produto padrão, por enquanto
+        // TODO: criar lógica para definir o tipo_produto a partir dos dados da API
         $query = "
             INSERT INTO produto (cod_barras, nome, imagem, id_tipo_produto)
             VALUES ( 
                 '$barcode', 
                 '{$object['description']}', 
                 '{$object['thumbnail']}', 
-                1 
+                1
             )
         ";
+        // Em teoria, o único erro que pode dar é se já existir o cod_barras especificado,
+        // o que é o comportamento esperado. Por isso, sem tratamento de erro aqui.
         run_query($query, $ignoreErrors=true);
 
 
@@ -110,7 +110,7 @@
         $resultData = run_query($query);
 
         $productId = $resultData[0]["id"];
-        
+    
 
         // Criação do novo item de supermercado no BD
         $query = "
@@ -124,7 +124,9 @@
         ";
         run_query($query);
         
-        
+
+        // Ao fim desse processo, é para termos criado um novo produto e/ou item,
+        // então buscamos por ele para que seja retornado no response.
         get_specified_item_id($barcode, $supermarketId);        
     }
 
