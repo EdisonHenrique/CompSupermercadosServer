@@ -2,7 +2,7 @@
     
     require_once "util.php";
 
-    function run_query(string $query, bool $ignoreErrors=false) {
+    function run_query(string $query, bool $returnErrorInsteadOfExiting=false) {
         // Attempt server connection
         $conn = pg_connect(getenv("DATABASE_URL"));
         if (!$conn){
@@ -11,14 +11,16 @@
 
         // Run SQL query
         $result = pg_query($conn, $query);
+        $error = pg_last_error($conn);
         // Close server connection 
         pg_close($conn);
 
-        if (!$result and !$ignoreErrors) {
-            //$resultError = pg_result_error($result);
-            //exit_with_error_response("Query error: $resultError");
-            $query = str_replace("\r\n", "", $query);
-            exit_with_error_response("Query error: $query");
+        if (!$result) {
+            if ($returnErrorInsteadOfExiting){
+                return $error;
+            } else {
+                exit_with_error_response($error);
+            }
         }
 
         return pg_fetch_all($result);
@@ -81,24 +83,30 @@
             FIM DO REQUEST À API
         */
         
-        $object = json_decode($data, true); // Array assoc. de dados retornados pela API   
+        $object = json_decode($data, true); // Array assoc. de dados retornados pela API  
+        
+        $productName = $object['description'];
+        $productImageUrl = $object['thumbnail'];
+        $itemAvgPrice = ($object['avg_price']) ? $object['avg_price'] : 0; // se avg_price vazio, seta como 0
+
+        if ($productName == "" or $productImageUrl == "") {
+            exit_with_error_response("Bluesoft Cosmos query returned incomplete results");
+        }
 
 
         // Criação de novo produto no BD.
         // O valor '1' é o tipo_produto padrão, por enquanto
         // TODO: criar lógica para definir o tipo_produto a partir dos dados da API
         $query = "
-            INSERT INTO produto (cod_barras, nome, imagem, id_tipo_produto)
+            INSERT INTO produto (cod_barras, nome, imagem_url, id_tipo_produto)
             VALUES ( 
                 '$barcode', 
-                '{$object['description']}', 
-                '{$object['thumbnail']}', 
+                '$productName', 
+                '$productImageUrl', 
                 1
             )
         ";
-        // Em teoria, o único erro que pode dar é se já existir o cod_barras especificado,
-        // o que é o comportamento esperado. Por isso, sem tratamento de erro aqui.
-        run_query($query, $ignoreErrors=true);
+        $possibleInsertError = run_query($query, $returnErrorInsteadOfExiting=true);
 
 
         // Obtenção do id do produto em questão
@@ -110,13 +118,17 @@
         $resultData = run_query($query);
 
         $productId = $resultData[0]["id"];
+
+        if ($productId == "" or $productId == NULL) { // $possibleInsertError confirmado
+            exit_with_error_response($possibleInsertError);
+        }
     
 
         // Criação do novo item de supermercado no BD
         $query = "
             INSERT INTO item (preco_atual, data_alter_preco, id_supermercado, id_produto)
             VALUES (
-                {$object['avg_price']},
+                $itemAvgPrice,
                 now(),
                 $supermarketId,
                 $productId
