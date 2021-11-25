@@ -23,7 +23,7 @@
 				SELECT produto.id
 					 , produto.nome
 					 , preco_atual
-					 , imagem 
+					 , imagem_url
 				FROM item
 				INNER JOIN produto ON item.id_produto = produto.id
 				INNER JOIN supermercado ON item.id_supermercado = supermercado.id
@@ -66,7 +66,7 @@
 			$query = "
 				SELECT nome
 					 , preco_atual
-					 , imagem
+					 , imagem_url
 				FROM item
 				INNER JOIN produto ON item.id_produto = produto.id
 				WHERE item.id = $id
