@@ -10,6 +10,7 @@
 
 	
 	function exit_with_error_response(string $message, int $errorCode=-1) {
+		$message = preg_replace("/[[:blank:]]+/", " ", $message);
 		output_json_response($errorCode, $message);
 		exit;
 	}

@@ -16,7 +16,6 @@
         $insertValues = rtrim($insertValues, ", ") . ")";
 
         $query = $insertCommand . $insertValues;
-        $query = str_replace("\r\n", "", $query);
 
         return $query;
     }
@@ -44,7 +43,7 @@
     
     // Run SQL query
 	$result = pg_query($conn, $query);
-    $error = trim(pg_last_error($conn), "\n^ ");
+    $error = pg_last_error($conn);
 
     // Close server connection 
 	pg_close($conn);

@@ -83,7 +83,7 @@
 	
 	// Run SQL query
 	$result = pg_query($conn, $query);
-	$error = preg_replace("/[[:blank:]]+/", " ", pg_last_error($conn));
+	$error = pg_last_error($conn);
 	
 	// Close server connection 
 	pg_close($conn);
