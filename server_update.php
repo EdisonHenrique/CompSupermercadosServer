@@ -35,24 +35,8 @@
     check_superglobal_params("POST", $requiredParams);
 
     $query = makeUpdate($columnValues);
+    run_query($query); // em caso de erros, a própria função para o script
 
-    // Attempt server connection
-    $conn = pg_connect(getenv("DATABASE_URL"));
-    if (!$conn){
-		exit_with_error_response("Server connection failed");
-	}
-    
-    // Run SQL query
-	$result = pg_query($conn, $query);
-    $error = pg_last_error($conn);
+	finish_with_json_response(1, "Table updated successfully");
 
-    // Close server connection 
-	pg_close($conn);
-
-    if (!$result) {
-        exit_with_error_response($error);
-	}
-	else {
-		output_json_response(1, "Table updated successfully");
-	}
 ?>

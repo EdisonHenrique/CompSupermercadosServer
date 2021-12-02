@@ -34,27 +34,9 @@
     check_superglobal_params("POST", $requiredParams);
 
     $query = makeInsert($columnValues);
+    run_query($query); // em caso de erros, a própria função para o script
 
-    // Attempt server connection
-    $conn = pg_connect(getenv("DATABASE_URL"));
-    if (!$conn){
-		exit_with_error_response("Server connection failed");
-	}
-    
-    // Run SQL query
-	$result = pg_query($conn, $query);
-    $error = pg_last_error($conn);
-
-    // Close server connection 
-	pg_close($conn);
-
-    if (!$result) {
-		$resultError = pg_result_error($result);
-		exit_with_error_response($error);
-	}
-	else {
-		output_json_response(1, "Row inserted successfully");
-	}
+	finish_with_json_response(1, "Row inserted successfully");
 
     /* Tem um problema aqui, essa função precisa filtrar
     caso aja a superglobal $_FILES, caso a superglobal 

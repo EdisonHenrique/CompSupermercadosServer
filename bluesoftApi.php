@@ -2,30 +2,6 @@
     
     require_once "util.php";
 
-    function run_query(string $query, bool $returnErrorInsteadOfExiting=false) {
-        // Attempt server connection
-        $conn = pg_connect(getenv("DATABASE_URL"));
-        if (!$conn){
-            exit_with_error_response("Server connection failed");
-        }
-
-        // Run SQL query
-        $result = pg_query($conn, $query);
-        $error = pg_last_error($conn);
-        // Close server connection 
-        pg_close($conn);
-
-        if (!$result) {
-            if ($returnErrorInsteadOfExiting){
-                return $error;
-            } else {
-                exit_with_error_response($error);
-            }
-        }
-
-        return pg_fetch_all($result);
-    }
-
     function get_specified_item_id($barcode, $supermarketId) {
         $query = "
             SELECT item.id
@@ -41,7 +17,7 @@
             $resultData = [
                 "itemId" => $resultData[0]["id"]
             ];
-            output_json_response(1, $resultData);
+            finish_with_json_response(1, $resultData);
             exit;
         } 
         
@@ -77,7 +53,7 @@
         
         if ($data === false || $data == NULL) {
             $resultError = curl_error($curl);
-            exit_with_error_response("Bluesoft Cosmos query error: $resultError");
+            throw_exception_response("Bluesoft Cosmos query error: $resultError");
         }
         /*  
             FIM DO REQUEST À API
@@ -90,7 +66,7 @@
         $itemAvgPrice = ($object['avg_price']) ? $object['avg_price'] : 0; // se avg_price vazio, seta como 0
 
         if ($productName == "" or $productImageUrl == "") {
-            exit_with_error_response("Bluesoft Cosmos query returned incomplete results");
+            throw_exception_response("Bluesoft Cosmos query returned incomplete results");
         }
 
 
@@ -120,7 +96,7 @@
         $productId = $resultData[0]["id"];
 
         if ($productId == "" or $productId == NULL) { // $possibleInsertError confirmado
-            exit_with_error_response($possibleInsertError);
+            throw_exception_response($possibleInsertError);
         }
     
 

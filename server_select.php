@@ -15,7 +15,7 @@
 	switch( $_GET["queryType"] ) {
 
 		default:
-			exit_with_error_response("Invalid query name");
+			throw_exception_response("Invalid query name");
 			
 		case "supermarketItems":
 			$id = require_id();
@@ -65,6 +65,7 @@
 			$id = require_id();
 			$query = "
 				SELECT nome
+				 	 , cod_barras
 					 , preco_atual
 					 , imagem_url
 				FROM item
@@ -75,32 +76,13 @@
 			
 	}
 
-	// Attempt server connection
-	$conn = pg_connect(getenv("DATABASE_URL"));
-	if (!$conn){
-		exit_with_error_response("Server connection failed");
-	}
-	
-	// Run SQL query
-	$result = pg_query($conn, $query);
-	$error = pg_last_error($conn);
-	
-	// Close server connection 
-	pg_close($conn);
+	$resultData = run_query($query);
 
-	// Echo query result/error JSON
-	if (!$result) {
-		$resultError = pg_result_error($result);
-		exit_with_error_response($error);
-	}
+	if ($resultData) {
+		finish_with_json_response(1, $resultData);
+	} 
 	else {
-		$resultData = pg_fetch_all($result);
-		if ($resultData) {
-			output_json_response(1, $resultData);
-		} 
-		else {
-			output_json_response(0, "Query returned no results");
-		}
+		finish_with_json_response(0, "Query returned no results");
 	}
 	
 ?>
