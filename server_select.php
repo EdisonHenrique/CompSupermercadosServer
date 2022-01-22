@@ -75,11 +75,11 @@
 			break;
 		case "nearestSupermarkets":
 			$id = require_id();
-			$Km = 1/111;
+			$Km = 0.009;
 			$query = "
 				SELECT id, nome
 				FROM supermercado
-				WHERE localizacao <-> point$id <= 1*$km
+				WHERE localizacao <-> point$id <= 1 * $km
 				ORDER BY localizacao <-> point$id
 			"; #Pra aumentar a range de busca basta aumentar o número de Km 
 	}
