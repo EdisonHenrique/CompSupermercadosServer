@@ -77,10 +77,10 @@
 			$id = require_id();
 			$Km = 0.009;
 			$query = "
-				SELECT id, nome
+				SELECT id, nome, localizacao <-> point$id as distancia
 				FROM supermercado
 				WHERE localizacao <-> point$id <= 1 * $km
-				ORDER BY localizacao <-> point$id
+				ORDER BY distancia
 			"; #Pra aumentar a range de busca basta aumentar o número de Km 
 			break;
 	}
