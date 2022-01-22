@@ -82,6 +82,7 @@
 				WHERE localizacao <-> point$id <= 1 * $km
 				ORDER BY localizacao <-> point$id
 			"; #Pra aumentar a range de busca basta aumentar o número de Km 
+			break;
 	}
 
 	$resultData = run_query($query);
