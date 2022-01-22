@@ -88,7 +88,7 @@
 		case "lastSupermarket":
 			$query = "
 				SELECT MAX(id)
-				FROM supermercados
+				FROM supermercado
 			";
 			break;
 	}
