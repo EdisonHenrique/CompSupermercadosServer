@@ -114,7 +114,7 @@
     }
 
     else {
-        throw_exception_response("Invalid or missing image file");
+        throw_exception_response("Invalid or missing image file. Error code: {$_FILES['userfile']['error']}");
     }
 
 ?> 
