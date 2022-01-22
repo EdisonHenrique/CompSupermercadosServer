@@ -80,7 +80,7 @@
 				SELECT id, nome
 				FROM supermercado
 				WHERE localizacao <-> point$id <= 1*$km
-				ORDER BY localizacao <-> point
+				ORDER BY localizacao <-> point$id
 			"; #Pra aumentar a range de busca basta aumentar o número de Km 
 	}
 
