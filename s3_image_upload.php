@@ -18,7 +18,7 @@
 
         if ($scaleWidth) $imageData = imagescale($imageData, $scaleWidth);
 
-        $exif = exif_read_data($source);
+        $exif = @exif_read_data($source);
         if (!empty($exif['Orientation'])) {
             switch ($exif['Orientation']) {
                 case 3:
@@ -126,7 +126,7 @@
     }
 
     else {
-        throw_exception_response("Invalid or missing image file. Error code: {$_FILES['userfile']['error']}");
+        throw_exception_response("Invalid or missing image file. Error code: " . var_or_default($_FILES['userfile']['error'], "none given") );
     }
 
 ?> 
