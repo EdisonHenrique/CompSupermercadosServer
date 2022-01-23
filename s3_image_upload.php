@@ -108,18 +108,15 @@
                 array('params' => array('ContentType' => 'image/jpeg'))
             );
             
-            $uploadUrl = $upload->get('ObjectURL');
+            $uploadUrl = $upload->get('ObjectURL') . "?time_uploaded=" . time();
             
-            // Só atualiza a url da imagem do produto se houver necessidade
-            // Quando a imagem é alterada, o nome do arquivo continua o mesmo, então o link também continua igual
-            if ($uploadUrl != $currentImageUrl) {
-                $query = "
-                    UPDATE produto
-                    SET imagem_url = '$uploadUrl'
-                    WHERE cod_barras = '$barcode'
-                ";
-                run_query($query);
-            }
+            $query = "
+                UPDATE produto
+                SET imagem_url = '$uploadUrl'
+                WHERE cod_barras = '$barcode'
+            ";
+            
+            run_query($query);
         } 
         catch (Exception $e) {
             throw_exception_response("Failed to upload image to Amazon S3");
