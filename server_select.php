@@ -20,7 +20,7 @@
 		case "supermarketItems":
 			$id = require_id();
 			$query = "
-				SELECT produto.id
+				SELECT item.id
 					 , produto.nome
 					 , preco_atual
 					 , imagem_url
@@ -70,7 +70,7 @@
 					 , imagem_url
 				FROM item
 				INNER JOIN produto ON item.id_produto = produto.id
-				WHERE item.id = $id
+				AND item.id = $id 
 			";
 			break;
 
