@@ -85,10 +85,11 @@
 			"; #Pra aumentar a range de busca basta aumentar o número de Km 
 			break;
 		
-		case "lastSupermarket":
+		case "lastId":
+			$id = require_id();
 			$query = "
 				SELECT MAX(id)
-				FROM supermercado
+				FROM $id
 			";
 			break;
 
