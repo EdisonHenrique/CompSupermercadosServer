@@ -54,6 +54,11 @@
 	}
 
 
+	function var_or_default(&$var, $default="") {
+		return isset($var) ? $var : $default;
+	}
+
+
 	function run_query(string $query, bool $returnErrorInsteadOfExiting=false) {
 		// Attempt server connection
 		$conn = pg_connect(getenv("DATABASE_URL"));
