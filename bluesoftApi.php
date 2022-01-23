@@ -49,14 +49,15 @@
         curl_setopt($curl, CURLOPT_FAILONERROR, true);
         
         $data = curl_exec($curl);
-        curl_close($curl);
         
         if ($data === false || $data == NULL) {
             $resultError = curl_error($curl);
             throw_exception_response("Bluesoft Cosmos query error: $resultError");
         }
+        
+        curl_close($curl);
         /*  
-            FIM DO REQUEST À API
+        FIM DO REQUEST À API
         */
         
         $object = json_decode($data, true); // Array assoc. de dados retornados pela API  
