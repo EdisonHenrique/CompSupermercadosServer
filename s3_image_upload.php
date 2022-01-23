@@ -3,27 +3,42 @@
     function compress_to_jpeg(string $source, int $quality, int $scaleWidth=null) {
         switch (mime_content_type($source)) {
             case 'image/jpeg':
-                $sourceImage = imagecreatefromjpeg($source);
+                $imageData = imagecreatefromjpeg($source);
                 break;
             case 'image/gif':
-                $sourceImage = imagecreatefromgif($source);
+                $imageData = imagecreatefromgif($source);
                 break;
             case 'image/png':
-                $sourceImage = imagecreatefrompng($source);
+                $imageData = imagecreatefrompng($source);
                 break;
             case 'image/bmp':
-                $sourceImage = imagecreatefrombmp($source);
+                $imageData = imagecreatefrombmp($source);
                 break;
         }
 
-        if ($scaleWidth) $sourceImage = imagescale($sourceImage, $scaleWidth);
+        if ($scaleWidth) $imageData = imagescale($imageData, $scaleWidth);
+
+        $exif = exif_read_data($source);
+        if (!empty($exif['Orientation'])) {
+            switch ($exif['Orientation']) {
+                case 3:
+                    $imageData = imagerotate($imageData, -180, 0);
+                    break;
+                case 6:
+                    $imageData = imagerotate($imageData, -90, 0);
+                    break;
+                case 8:
+                    $imageData = imagerotate($imageData, 90, 0);
+                    break;
+            }
+        }
         
         ob_start();
-            imagejpeg($sourceImage, null, $quality);
-            $compressedImage = ob_get_contents();
+            imagejpeg($imageData, null, $quality);
+            $compressedImageData = ob_get_contents();
         ob_end_clean();
 
-        return $compressedImage;
+        return $compressedImageData;
     }
 
     require_once "util.php";
