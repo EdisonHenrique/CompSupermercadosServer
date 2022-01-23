@@ -3,27 +3,42 @@
     function compress_to_jpeg(string $source, int $quality, int $scaleWidth=null) {
         switch (mime_content_type($source)) {
             case 'image/jpeg':
-                $sourceImage = imagecreatefromjpeg($source);
+                $imageData = imagecreatefromjpeg($source);
                 break;
             case 'image/gif':
-                $sourceImage = imagecreatefromgif($source);
+                $imageData = imagecreatefromgif($source);
                 break;
             case 'image/png':
-                $sourceImage = imagecreatefrompng($source);
+                $imageData = imagecreatefrompng($source);
                 break;
             case 'image/bmp':
-                $sourceImage = imagecreatefrombmp($source);
+                $imageData = imagecreatefrombmp($source);
                 break;
         }
 
-        if ($scaleWidth) $sourceImage = imagescale($sourceImage, $scaleWidth);
+        if ($scaleWidth) $imageData = imagescale($imageData, $scaleWidth);
+
+        $exif = @exif_read_data($source);
+        if (!empty($exif['Orientation'])) {
+            switch ($exif['Orientation']) {
+                case 3:
+                    $imageData = imagerotate($imageData, -180, 0);
+                    break;
+                case 6:
+                    $imageData = imagerotate($imageData, -90, 0);
+                    break;
+                case 8:
+                    $imageData = imagerotate($imageData, 90, 0);
+                    break;
+            }
+        }
         
         ob_start();
-            imagejpeg($sourceImage, null, $quality);
-            $compressedImage = ob_get_contents();
+            imagejpeg($imageData, null, $quality);
+            $compressedImageData = ob_get_contents();
         ob_end_clean();
 
-        return $compressedImage;
+        return $compressedImageData;
     }
 
     require_once "util.php";
@@ -93,18 +108,15 @@
                 array('params' => array('ContentType' => 'image/jpeg'))
             );
             
-            $uploadUrl = $upload->get('ObjectURL');
+            $uploadUrl = $upload->get('ObjectURL') . "?time_uploaded=" . time();
             
-            // Só atualiza a url da imagem do produto se houver necessidade
-            // Quando a imagem é alterada, o nome do arquivo continua o mesmo, então o link também continua igual
-            if ($uploadUrl != $currentImageUrl) {
-                $query = "
-                    UPDATE produto
-                    SET imagem_url = '$uploadUrl'
-                    WHERE cod_barras = '$barcode'
-                ";
-                run_query($query);
-            }
+            $query = "
+                UPDATE produto
+                SET imagem_url = '$uploadUrl'
+                WHERE cod_barras = '$barcode'
+            ";
+            
+            run_query($query);
         } 
         catch (Exception $e) {
             throw_exception_response("Failed to upload image to Amazon S3");
@@ -114,7 +126,7 @@
     }
 
     else {
-        throw_exception_response("Invalid or missing image file. Error code: {$_FILES['userfile']['error']}");
+        throw_exception_response("Invalid or missing image file. Error code: " . var_or_default($_FILES['userfile']['error'], "none given") );
     }
 
 ?> 

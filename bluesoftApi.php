@@ -49,25 +49,33 @@
         curl_setopt($curl, CURLOPT_FAILONERROR, true);
         
         $data = curl_exec($curl);
-        curl_close($curl);
         
         if ($data === false || $data == NULL) {
             $resultError = curl_error($curl);
             throw_exception_response("Bluesoft Cosmos query error: $resultError");
         }
+        
+        curl_close($curl);
         /*  
-            FIM DO REQUEST À API
+        FIM DO REQUEST À API
         */
         
         $object = json_decode($data, true); // Array assoc. de dados retornados pela API  
         
-        $productName = $object['description'];
-        $productImageUrl = $object['thumbnail'];
-        $itemAvgPrice = ($object['avg_price']) ? $object['avg_price'] : 0; // se avg_price vazio, seta como 0
-
-        if ($productName == "" or $productImageUrl == "") {
-            throw_exception_response("Bluesoft Cosmos query returned incomplete results");
+        // Obtenção do nome do produto
+        $productName = var_or_default($object['description']);
+        
+        // Obtenção da imagem
+        $productImageUrl = var_or_default($object['thumbnail']);
+        if ($productImageUrl == "") {
+            $productImageUrl = var_or_default($object['brand']['picture']); // se não tem foto, pega foto da marca
         }
+        if ($productImageUrl == "") {
+            $productImageUrl = "https://comp-supermercados.s3.sa-east-1.amazonaws.com/default.jpeg"; // se não tem foto da marca, coloca default
+        }
+        
+        // Obtenção do preço médio
+        $itemAvgPrice = var_or_default($object['avg_price'], 0); // se avg_price vazio, seta como 0
 
 
         // Criação de novo produto no BD.
