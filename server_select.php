@@ -91,6 +91,22 @@
 				FROM supermercado
 			";
 			break;
+
+		case "cartsHistory":
+			$id = require_id();
+			$query = "
+				SELECT carrinho.id
+					 , nome 
+					 , data 
+					 , SUM(carrinho_item.quantidade) as quantidade
+					 , SUM(item.preco_atual * carrinho_item.quantidade) as total
+				FROM carrinho
+				INNER JOIN carrinho_item ON carrinho.id = carrinho_item.id_carrinho
+				INNER JOIN item ON carrinho_item.id_item = item.id
+				WHERE id_usuario = $id
+				GROUP BY carrinho.id
+			";
+			break;
 	}
 
 	$resultData = run_query($query);
