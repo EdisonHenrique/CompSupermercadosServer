@@ -70,7 +70,7 @@
         if ($productImageUrl == "") {
             $productImageUrl = var_or_default($object['brand']['picture']); // se não tem foto, pega foto da marca
         }
-        if ($productImageUrl == "") {
+        if ($productImageUrl == "" or !filter_var($productImageUrl, FILTER_VALIDATE_URL)) {
             $productImageUrl = "https://comp-supermercados.s3.sa-east-1.amazonaws.com/default.jpeg"; // se não tem foto da marca, coloca default
         }
         
