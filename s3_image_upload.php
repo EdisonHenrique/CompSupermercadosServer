@@ -119,7 +119,7 @@
             run_query($query);
         } 
         catch (Exception $e) {
-            throw_exception_response("Failed to upload image to Amazon S3");
+            throw_exception_response("Failed to upload image to Amazon S3. Exception: " . $e->getMessage());
         }
 
         finish_with_json_response(1, "Image uploaded and product updated successfully");        
