@@ -1,6 +1,19 @@
 <?php
     require_once "util.php";
 
+    function makeWhere() {
+        $whereConditions = $_POST["where"];
+        $where = " WHERE ";
+        foreach ($whereConditions as $column => $value) {
+            if (!is_numeric($value)) {
+                $value = "'$value'";
+            }
+            $where .= $column . " = " . $value . " AND ";
+        }
+        $where = rtrim($where, " AND ");
+        return $where;
+    }
+
     function makeUpdate(array $columnValues) {
         $update = "UPDATE " . trim($_POST["table"]);
 
@@ -13,17 +26,16 @@
         }
         $set = rtrim($set, ", ");
 
-        $where = " WHERE id = " . $_POST["id"];
+        $where = makeWhere();
 
         $query = $update . $set . $where;
-        $query = str_replace("\r\n", "", $query);
 
         return $query;
     }
 
     
     // Create the parameters array
-    $requiredParams = ["table", "id"];
+    $requiredParams = ["table", "where"];
     $columnValues = array();
     foreach ($_POST as $key => $value) {
         if (!in_array($key, $requiredParams, true)) {
