@@ -1,7 +1,7 @@
 <?php
     require_once "util.php";
 
-    function makeWhere() {
+    function generate_where_clause() {
         $whereConditions = $_POST["where"];
         $where = " WHERE ";
         foreach ($whereConditions as $column => $value) {
@@ -14,7 +14,7 @@
         return $where;
     }
 
-    function makeUpdate(array $columnValues) {
+    function generate_update_query(array $columnValues) {
         $update = "UPDATE " . trim($_POST["table"]);
 
         $set = " SET ";
@@ -26,7 +26,7 @@
         }
         $set = rtrim($set, ", ");
 
-        $where = makeWhere();
+        $where = generate_where_clause();
 
         $query = $update . $set . $where;
 
@@ -46,7 +46,7 @@
 
     check_superglobal_params("POST", $requiredParams);
 
-    $query = makeUpdate($columnValues);
+    $query = generate_update_query($columnValues);
     run_query($query); // em caso de erros, a própria função para o script
 
 	finish_with_json_response(1, "Table updated successfully");

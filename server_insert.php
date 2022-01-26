@@ -2,7 +2,7 @@
 
     require_once "util.php";
 
-    function makeInsert(array $columnValues) {
+    function generate_insert_query(array $columnValues) {
         $insertCommand = "INSERT INTO " . trim($_POST["table"]) . " (";
         $insertValues = " VALUES (";
         foreach ($columnValues as $column => $value) {
@@ -33,7 +33,7 @@
     
     check_superglobal_params("POST", $requiredParams);
 
-    $query = makeInsert($columnValues);
+    $query = generate_insert_query($columnValues);
     run_query($query); // em caso de erros, a própria função para o script
 
 	finish_with_json_response(1, "Row inserted successfully");

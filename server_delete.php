@@ -1,7 +1,7 @@
 <?php
     require_once "util.php";
 
-    function makeDelete() {
+    function generate_delete_query() {
         $delete = "DELETE FROM " . trim($_POST["table"]);
 
         $whereConditions = $_POST["where"];
