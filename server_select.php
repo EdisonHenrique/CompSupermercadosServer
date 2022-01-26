@@ -109,6 +109,15 @@
 			";
 			break;
 
+			case "cartInfo":
+				$id = require_id();
+				$query = "
+					SELECT nome, id_supermercado
+					FROM carrinho
+					WHERE carrinho.id = $id
+			";
+			break;
+
 			case "cartItems":
 				$id = require_id();
 				$query = "
@@ -116,7 +125,7 @@
 						 , item.preco_atual
 						 , produto.nome
 						 , produto.imagem_url
-						 , carrinho_item.quantidade
+						 , quantidade
 					FROM carrinho_item
 					INNER JOIN carrinho ON id_carrinho = carrinho.id
 					INNER JOIN item ON id_item = item.id
