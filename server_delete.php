@@ -21,8 +21,7 @@
 
     check_superglobal_params("POST", ["table", "where"]);
 
-    $query = "DELETE FROM " . $_POST["table"] . "WHERE " . $_POST["where_id"] 
-                . " = " . $_POST["id"];
+    $query = generate_delete_query();
     run_query($query);
 
     finish_with_json_response(1, "Row deleted successfully");
