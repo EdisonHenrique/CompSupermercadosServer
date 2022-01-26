@@ -108,6 +108,22 @@
 				GROUP BY carrinho.id
 			";
 			break;
+
+			case "cartItems":
+				$id = require_id();
+				$query = "
+					SELECT item.id
+						 , item.preco_atual
+						 , produto.nome
+						 , produto.imagem_url
+						 , carrinho_item.quantidade
+					FROM carrinho_item
+					INNER JOIN carrinho ON id_carrinho = carrinho.id
+					INNER JOIN item ON id_item = item.id
+					INNER JOIN produto ON item.id_produto = produto.id
+					WHERE id_carrinho = $id
+			";
+			break;
 	}
 
 	$resultData = run_query($query);
