@@ -106,6 +106,7 @@
 				LEFT JOIN item ON carrinho_item.id_item = item.id
 				WHERE id_usuario = $id
 				GROUP BY carrinho.id
+				ORDER BY data DESC
 			";
 			break;
 
