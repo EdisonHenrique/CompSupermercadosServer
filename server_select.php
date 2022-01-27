@@ -97,16 +97,18 @@
 			$id = require_id();
 			$query = "
 				SELECT carrinho.id
-					 , nome 
-					 , to_char(data, 'DD/MM/YYYY') as data
-					 , COALESCE(SUM(carrinho_item.quantidade), 0) as qtd_itens
-					 , COALESCE(SUM(item.preco_atual * carrinho_item.quantidade), 0) as total
+						, carrinho.nome 
+						, supermercado.nome AS nome_supermercado
+						, to_char(data, 'DD/MM/YYYY') as data
+						, COALESCE(SUM(carrinho_item.quantidade), 0) as qtd_itens
+						, COALESCE(SUM(item.preco_atual * carrinho_item.quantidade), 0) as total
 				FROM carrinho
 				LEFT JOIN carrinho_item ON carrinho.id = carrinho_item.id_carrinho
 				LEFT JOIN item ON carrinho_item.id_item = item.id
+				INNER JOIN supermercado ON carrinho.id_supermercado = supermercado.id
 				WHERE id_usuario = $id
-				GROUP BY carrinho.id
-				ORDER BY data DESC
+				GROUP BY carrinho.id, supermercado.nome
+				ORDER BY carrinho.data DESC
 			";
 			break;
 
