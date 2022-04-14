@@ -24,6 +24,22 @@
         else return false;
     }
 
+    function get_specified_product_id($barcode) {
+        $query = "
+            SELECT produto.id
+            FROM produto
+            WHERE cod_barras = '$barcode'
+        ";
+
+        $resultData = run_query($query);
+
+        if ($resultData) {
+            return $resultData[0]["id"];
+        } 
+        
+        else return false;
+    }
+
     check_superglobal_params("POST", ["barcode", "supermarketId"]);
 
     $barcode = $_POST["barcode"];
@@ -31,67 +47,79 @@
 
     // Se a tentativa de obter o item especificado falhar
     if ( !get_specified_item_id($barcode, $supermarketId) ) {
-        /*
-            INICIO DO REQUEST À API BLUESOFT COSMOS
-        */
-        $url = "https://api.cosmos.bluesoft.com.br/gtins/$barcode.json";
-        $agent = "Cosmos-API-Request";
-        $headers = array(
-            "Content-Type: application/json",
-            "X-Cosmos-Token: uCT7hFrsRUDdIA4JD9U26A"
-        );
-        
-        $curl = curl_init($url);
-        curl_setopt($curl, CURLOPT_USERAGENT, $agent);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_FAILONERROR, true);
-        
-        $data = curl_exec($curl);
-        
-        if ($data === false || $data == NULL) {
-            $resultError = curl_error($curl);
-            throw_exception_response("Bluesoft Cosmos query error: $resultError");
-        }
-        
-        curl_close($curl);
-        /*  
-        FIM DO REQUEST À API
-        */
-        
-        $object = json_decode($data, true); // Array assoc. de dados retornados pela API  
-        
-        // Obtenção do nome do produto
-        $productName = var_or_default($object['description']);
-        
-        // Obtenção da imagem
-        $productImageUrl = var_or_default($object['thumbnail']);
-        if ($productImageUrl == "") {
-            $productImageUrl = var_or_default($object['brand']['picture']); // se não tem foto, pega foto da marca
-        }
-        if ($productImageUrl == "" or !filter_var($productImageUrl, FILTER_VALIDATE_URL)) {
-            $productImageUrl = "https://comp-supermercados.s3.sa-east-1.amazonaws.com/default.jpeg"; // se não tem foto da marca, coloca default
-        }
-        
-        // Obtenção do preço médio
-        $itemAvgPrice = var_or_default($object['avg_price'], 0); // se avg_price vazio, seta como 0
 
-
-        // Criação de novo produto no BD.
-        // O valor '1' é o tipo_produto padrão, por enquanto
-        // TODO: criar lógica para definir o tipo_produto a partir dos dados da API
+        // Verificando se o produto já existe
         $query = "
-            INSERT INTO produto (cod_barras, nome, imagem_url, id_tipo_produto)
-            VALUES ( 
-                '$barcode', 
-                '$productName', 
-                '$productImageUrl', 
-                1
-            )
+            SELECT id 
+            FROM produto
+            WHERE cod_barras = '$barcode'
         ";
-        $possibleInsertError = run_query($query, $returnErrorInsteadOfExiting=true);
+        $resultData = run_query($query);
 
+        // Só consulta BLuesoft se produto não está no nosso banco
+        // TODO: polir isso
+        if (!$resultData) {
+            /*
+            INICIO DO REQUEST À API BLUESOFT COSMOS
+            */
+            $url = "https://api.cosmos.bluesoft.com.br/gtins/$barcode.json";
+            $agent = "Cosmos-API-Request";
+            $headers = array(
+                "Content-Type: application/json",
+                "X-Cosmos-Token: uCT7hFrsRUDdIA4JD9U26A"
+            );
+            
+            $curl = curl_init($url);
+            curl_setopt($curl, CURLOPT_USERAGENT, $agent);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_FAILONERROR, true);
+            
+            $data = curl_exec($curl);
+            
+            if ($data === false || $data == NULL) {
+                $resultError = curl_error($curl);
+                throw_exception_response("Bluesoft Cosmos query error: $resultError");
+            }
+            
+            curl_close($curl);
+            /*  
+            FIM DO REQUEST À API
+            */
+            
+            $object = json_decode($data, true); // Array assoc. de dados retornados pela API  
+            
+            // Obtenção do nome do produto
+            $productName = var_or_default($object['description']);
+            
+            // Obtenção da imagem
+            $productImageUrl = var_or_default($object['thumbnail']);
+            if ($productImageUrl == "") {
+                $productImageUrl = var_or_default($object['brand']['picture']); // se não tem foto, pega foto da marca
+            }
+            if ($productImageUrl == "" or !filter_var($productImageUrl, FILTER_VALIDATE_URL)) {
+                $productImageUrl = "https://comp-supermercados.s3.sa-east-1.amazonaws.com/default.jpeg"; // se não tem foto da marca, coloca default
+            }
+            
+            // Obtenção do preço médio
+            $itemAvgPrice = var_or_default($object['avg_price'], 0); // se avg_price vazio, seta como 0
+
+
+            // Criação de novo produto no BD.
+            // O valor '1' é o tipo_produto padrão, por enquanto
+            // TODO: criar lógica para definir o tipo_produto a partir dos dados da API
+            $query = "
+                INSERT INTO produto (cod_barras, nome, imagem_url, id_tipo_produto)
+                VALUES ( 
+                    '$barcode', 
+                    '$productName', 
+                    '$productImageUrl', 
+                    1
+                )
+            ";
+            $possibleInsertError = run_query($query, $returnErrorInsteadOfExiting=true);
+        }
 
         // Obtenção do id do produto em questão
         $query = "
