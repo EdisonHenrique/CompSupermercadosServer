@@ -119,39 +119,56 @@
                 )
             ";
             $possibleInsertError = run_query($query, $returnErrorInsteadOfExiting=true);
+
+            // Obtenção do id do produto em questão
+            $query = "
+                SELECT id 
+                FROM produto
+                WHERE cod_barras = '$barcode'
+            ";
+            $resultData = run_query($query);
+
+            $productId = $resultData[0]["id"];
+
+            if ($productId == "" or $productId == NULL) { // $possibleInsertError confirmado
+                throw_exception_response($possibleInsertError);
+            }
+
+            // Criação do novo item de supermercado no BD
+            $query = "
+                INSERT INTO item (preco_atual, data_alter_preco, id_supermercado, id_produto)
+                VALUES (
+                    $itemAvgPrice,
+                    now(),
+                    $supermarketId,
+                    $productId
+                )
+            ";
+            run_query($query);
+            
+
+            // Ao fim desse processo, é para termos criado um novo produto e/ou item,
+            // então buscamos por ele para que seja retornado no response.
+            get_specified_item_id($barcode, $supermarketId);
         }
 
-        // Obtenção do id do produto em questão
-        $query = "
-            SELECT id 
-            FROM produto
-            WHERE cod_barras = '$barcode'
-        ";
-        $resultData = run_query($query);
-
-        $productId = $resultData[0]["id"];
-
-        if ($productId == "" or $productId == NULL) { // $possibleInsertError confirmado
-            throw_exception_response($possibleInsertError);
+        // Se já tem o produto, só aproveita ele com rpeço padrão 1
+        else {
+            $productId = $resultData[0]["id"];
+            
+            // Criação do novo item de supermercado no BD
+            $query = "
+                INSERT INTO item (preco_atual, data_alter_preco, id_supermercado, id_produto)
+                VALUES (
+                    1,
+                    now(),
+                    $supermarketId,
+                    $productId
+                )
+            ";
         }
-    
 
-        // Criação do novo item de supermercado no BD
-        $query = "
-            INSERT INTO item (preco_atual, data_alter_preco, id_supermercado, id_produto)
-            VALUES (
-                $itemAvgPrice,
-                now(),
-                $supermarketId,
-                $productId
-            )
-        ";
-        run_query($query);
-        
-
-        // Ao fim desse processo, é para termos criado um novo produto e/ou item,
-        // então buscamos por ele para que seja retornado no response.
-        get_specified_item_id($barcode, $supermarketId);        
+                
     }
 
     ?>
