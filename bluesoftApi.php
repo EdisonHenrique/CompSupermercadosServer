@@ -145,11 +145,6 @@
                 )
             ";
             run_query($query);
-            
-
-            // Ao fim desse processo, é para termos criado um novo produto e/ou item,
-            // então buscamos por ele para que seja retornado no response.
-            get_specified_item_id($barcode, $supermarketId);
         }
 
         // Se já tem o produto, só aproveita ele com rpeço padrão 1
@@ -167,6 +162,10 @@
                 )
             ";
         }
+
+        // Ao fim desse processo, é para termos criado um novo produto e/ou item,
+        // então buscamos por ele para que seja retornado no response.
+        get_specified_item_id($barcode, $supermarketId);
 
                 
     }
